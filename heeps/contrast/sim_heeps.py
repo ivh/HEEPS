@@ -49,24 +49,12 @@ def sim_heeps(psf_ON, psf_OFF, header, **conf):
 
     # Set up detector size to match the input cube - using the full
     # METIS detector of 2048 x 2048 pixels would require too much memory
-    cmd["!DET.width"] = naxis1
-    cmd["!DET.height"] = naxis2
+    #cmd["!DET.width"] = naxis1
+    #cmd["!DET.height"] = naxis2
 
     metis = sim.OpticalTrain(cmd)
 
-    # Set included and excluded effects
-    #metis['armazones_atmo_skycalc_ter_curve'].include = True
-    #metis['armazones_atmo_default_ter_curve'].include = False
-
-    #metis['scope_surface_list'].include = False
-    #metis['eso_combined_reflection'].include = True
-
-    #metis['detector_array_list'].include = False
-    #metis['detector_window'].include = True
-
-    #metis['scope_vibration'].include = False
-    #metis['detector_linearity'].include = False
-    #metis['metis_psf_img'].include = False
+    metis['psf'].include = False
 
     # We attach the spectrum of Vega to the image
     spec = SourceSpectrum.from_file(WORKDIR+"alpha_lyr_stis_008.fits")
