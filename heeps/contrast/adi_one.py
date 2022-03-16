@@ -11,12 +11,12 @@ def adi_one(dir_output='output_files', band='L', mode='RAVC', add_bckg=False,
         pscale=5.47, dit=0.3, mag=5, lat=-24.59, dec=-5, rim=19,
         app_strehl=0.64, nscreens=None, ndet=None, tag=None, student_distrib=True,
         savepsf=False, savefits=False, starphot=1e11, verbose=False, **conf):
-    
-    """ 
-    This function calculates and draws the contrast curve (5-sigma sensitivity) 
+
+    """
+    This function calculates and draws the contrast curve (5-sigma sensitivity)
     for a specific set of off-axis PSF and on-axis PSF (or cube of PSFs),
     using the VIP package to perform ADI post-processing.
-    
+
     Args:
         dir_output (str):
             path to output fits files and input PSFs (onaxis & offaxis)
@@ -25,7 +25,7 @@ def adi_one(dir_output='output_files', band='L', mode='RAVC', add_bckg=False,
         mode (str):
             HCI mode: RAVC, CVC, APP, CLC
         add_bckg (bool)
-            true means background flux and photon noise are added 
+            true means background flux and photon noise are added
         pscale (float):
             pixel scale in mas/pix (e.g. METIS LM=5.47, NQ=6.79)
         dit (float):
@@ -66,6 +66,7 @@ def adi_one(dir_output='output_files', band='L', mode='RAVC', add_bckg=False,
     loadname = os.path.join(dir_output, '%s_PSF_%s_%s.fits'%('%s', band, mode))
     # get normalized on-axis PSFs (star)
     psf_ON = fits.getdata(loadname%'onaxis')
+    header_ON = fits.getheader(loadname%'onaxis')
     assert psf_ON.ndim == 3, "on-axis PSF cube must be 3-dimensional"
     # cut/crop cube
     if nscreens != None:
@@ -84,7 +85,7 @@ def adi_one(dir_output='output_files', band='L', mode='RAVC', add_bckg=False,
     # add background and photon noise: include star flux and HCI mode transmission
     if add_bckg is True:
         conf.update(mode=mode, dit=dit, mag=mag)
-        psf_ON, psf_OFF = background(psf_ON, psf_OFF, verbose=True, **conf)
+        psf_ON, psf_OFF = background(psf_ON, psf_OFF, header=header_ON, verbose=True, **conf)
     # apply APP Strehl
     if 'APP' in mode:
         psf_OFF *= app_strehl
@@ -122,7 +123,7 @@ def adi_one(dir_output='output_files', band='L', mode='RAVC', add_bckg=False,
     # parallactic angle in deg
     pa = -np.rad2deg(np.arctan2(-np.sin(hr), np.cos(dr)*np.tan(lr) \
             - np.sin(dr)*np.cos(hr)))
-    
+
     """ VIP: post-processing (ADI, ADI-PCA,...) """
     # VIP post-processing algorithm
     algo = vip_hci.medsub.median_sub
@@ -153,5 +154,5 @@ def adi_one(dir_output='output_files', band='L', mode='RAVC', add_bckg=False,
         save2fits(psf_pp, 'psf_%s%s%s'%(name, '_%s_%s', tag), dir_output=dir_output, band=band, mode=mode)
 
     return sep, sen
-    
+
 

@@ -3,13 +3,13 @@ import numpy as np
 from astropy.io import fits
 
 
-def background(psf_ON, psf_OFF, mode='RAVC', lam=3.8e-6, dit=0.3, 
-        mag=5, mag_ref=0, flux_star=9e10, flux_bckg=9e4, app_single_psf=0.48, 
-        f_vc_trans=None, f_app_trans=None, seed=123456, verbose=False, 
+def background(psf_ON, psf_OFF, header=None, mode='RAVC', lam=3.8e-6, dit=0.3,
+        mag=5, mag_ref=0, flux_star=9e10, flux_bckg=9e4, app_single_psf=0.48,
+        f_vc_trans=None, f_app_trans=None, seed=123456, verbose=False,
         call_ScopeSim=False, **conf):
 
-    """ 
-    This function applies background and photon noise to intup PSFs (off-axis and on-axis), 
+    """
+    This function applies background and photon noise to intup PSFs (off-axis and on-axis),
     incuding transmission, star flux, and components transmittance.
 
     Args:
@@ -18,7 +18,7 @@ def background(psf_ON, psf_OFF, mode='RAVC', lam=3.8e-6, dit=0.3,
         psf_OFF (float ndarray):
             off-axis PSF frame
         mode (str):
-            HCI mode: RAVC, CVC, APP, CLC            
+            HCI mode: RAVC, CVC, APP, CLC
         lam (float):
             wavelength in m
         dit (float):
@@ -41,7 +41,7 @@ def background(psf_ON, psf_OFF, mode='RAVC', lam=3.8e-6, dit=0.3,
             seed used by numpy.random process
         call_ScopeSim (bool):
             true if interfacing ScopeSim
-    
+
     Return:
         psf_ON (float ndarray):
             cube of on-axis PSFs
@@ -65,10 +65,10 @@ def background(psf_ON, psf_OFF, mode='RAVC', lam=3.8e-6, dit=0.3,
     if 'APP' in mode:
         psf_OFF *= app_single_psf
         psf_ON *= app_single_psf
-    
+
     # TODO: fix scopesim-heeps interface
     if call_ScopeSim is True:
-        psf_ON, psf_OFF = sim_heeps(psf_ON, psf_OFF, **conf)
+        psf_ON, psf_OFF = sim_heeps(psf_ON, psf_OFF, header, **conf)
     else:
         # rescale PSFs to star signal
         star_signal = dit * flux_star * 10**(-0.4*(mag - mag_ref))
